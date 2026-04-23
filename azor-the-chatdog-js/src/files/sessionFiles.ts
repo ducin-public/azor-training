@@ -39,7 +39,7 @@ function timestampedToMessage(msg: TimestampedMessage): Message {
  */
 export function loadSessionHistory(
   sessionId: string
-): Result<Message[], string> {
+): Result<{ history: Message[] }, string> {
   const filePath = getSessionFilePath(sessionId);
 
   if (!fs.existsSync(filePath)) {
@@ -56,7 +56,10 @@ export function loadSessionHistory(
     // Convert timestamped messages to universal format
     const history = data.history.map(timestampedToMessage);
 
-    return { success: true, value: history };
+    return {
+      success: true,
+      value: { history }
+    };
   } catch (error) {
     if (error instanceof SyntaxError) {
       return {

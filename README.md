@@ -1,9 +1,13 @@
-# Software is Cool: Workshop
+# AZØR TRAINING
 
-- https://github.com/google-gemini/gemini-cli
-- https://aistudio.google.com/app/api-keys
-- python: https://www.python.org/downloads/
-- nodejs: https://nodejs.org/en/download
+- gemini-CLI
+  - download Gemini CLI: https://github.com/google-gemini/gemini-cli
+  - set up Gemini API key: https://aistudio.google.com/app/api-keys
+- open router: https://openrouter.ai/workspaces/
+- openAI: https://platform.openai.com/settings/organization/billing/overview
+- SDKs:
+  - python (download platform): https://www.python.org/downloads/
+  - nodejs (download platform): https://nodejs.org/en/download
 
 ## Question
 

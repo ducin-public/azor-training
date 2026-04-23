@@ -101,7 +101,7 @@ class GeminiLLMClient:
         Returns:
             Formatted preparation message string
         """
-        return "🤖 Przygotowywanie klienta Gemini..."
+        return "🤖 Preparing Gemini client..."
     
     @classmethod
     def from_environment(cls) -> 'GeminiLLMClient':
@@ -137,7 +137,7 @@ class GeminiLLMClient:
         try:
             return genai.Client()
         except Exception as e:
-            console.print_error(f"Błąd inicjalizacji klienta Gemini: {e}")
+            console.print_error(f"Error initializing Gemini client: {e}")
             sys.exit(1)
     
     def create_chat_session(self, 
@@ -214,7 +214,7 @@ class GeminiLLMClient:
             )
             return response.total_tokens
         except Exception as e:
-            console.print_error(f"Błąd podczas liczenia tokenów: {e}")
+            console.print_error(f"Error while counting tokens: {e}")
             return 0
     
     def get_model_name(self) -> str:
@@ -243,7 +243,7 @@ class GeminiLLMClient:
         else:
             masked_key = f"{self.api_key[:4]}...{self.api_key[-4:]}"
         
-        return f"✅ Klient Gemini gotowy do użycia (Model: {self.model_name}, Key: {masked_key})"
+        return f"✅ Gemini client ready (Model: {self.model_name}, Key: {masked_key})"
     
     @property
     def client(self):

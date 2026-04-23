@@ -8,8 +8,8 @@ import type { SessionManager } from '../session/sessionManager.js';
 /**
  * Remove current session and create a new one
  */
-export function removeCurrentSession(manager: SessionManager): void {
-  const result = manager.removeCurrentSessionAndCreateNew();
+export async function removeCurrentSession(manager: SessionManager): Promise<void> {
+  const result = await manager.removeCurrentSessionAndCreateNew();
 
   if (result.success) {
     printSuccess(`Session ${result.removedId} removed. Created new session.`);

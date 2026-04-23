@@ -11,7 +11,7 @@ import { initChat, mainLoop } from './chat.js';
  */
 async function main(): Promise<void> {
   try {
-    initChat();
+    await initChat();
     await mainLoop();
   } catch (error) {
     console.error('Fatal error:', error);

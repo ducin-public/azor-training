@@ -17,23 +17,14 @@ config();
 /**
  * Initialize the chat application
  */
-export function initChat(): void {
-  // Print welcome banner
+export async function initChat(): Promise<void> {
   printWelcome();
 
-  // Create assistant
   const assistant = createAzorAssistant();
-
-  // Get session manager
   const manager = getSessionManager(assistant);
-
-  // Get CLI session ID if provided
   const cliSessionId = getSessionIdFromCLI();
+  const session = await manager.initializeFromCLI(cliSessionId);
 
-  // Initialize session from CLI
-  const session = manager.initializeFromCLI(cliSessionId);
-
-  // Display session info
   if (cliSessionId) {
     printInfo(`Loaded session: ${session.id}`);
   } else {
@@ -75,7 +66,7 @@ export async function mainLoop(): Promise<void> {
 
       // Handle commands
       if (userInput.startsWith('/')) {
-        const shouldExit = handleCommand(userInput, manager);
+        const shouldExit = await handleCommand(userInput, manager);
         if (shouldExit) {
           break;
         }
@@ -94,7 +85,7 @@ export async function mainLoop(): Promise<void> {
       // Display response
       printAssistant(`\n${assistant.name}: ${response.text}`);
       printInfo(
-        `Tokens: ${tokenInfo.total} (Pozostało: ${tokenInfo.remaining} / ${tokenInfo.max})`
+        `Tokens: ${tokenInfo.total} (Remaining: ${tokenInfo.remaining} / ${tokenInfo.max})`
       );
 
       // Save session

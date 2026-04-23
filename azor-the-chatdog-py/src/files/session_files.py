@@ -98,10 +98,10 @@ def list_sessions():
             with open(log_path, 'r', encoding='utf-8') as f:
                 log_data = json.load(f)
                 history_len = len(log_data.get('history', []))
-                last_msg_time_str = log_data.get('history', [{}])[-1].get('timestamp', 'Brak daty')
+                last_msg_time_str = log_data.get('history', [{}])[-1].get('timestamp', 'No date')
                 
-                time_str = 'Brak aktywności'
-                if last_msg_time_str != 'Brak daty':
+                time_str = 'No activity'
+                if last_msg_time_str != 'No date':
                     try:
                         dt = datetime.fromisoformat(last_msg_time_str)
                         time_str = dt.strftime('%Y-%m-%d %H:%M')
@@ -117,7 +117,7 @@ def list_sessions():
         except Exception:
             sessions_data.append({
                 'id': sid,
-                'error': 'BŁĄD ODCZYTU PLIKU'
+                'error': 'FILE READ ERROR'
             })
     
     return sessions_data

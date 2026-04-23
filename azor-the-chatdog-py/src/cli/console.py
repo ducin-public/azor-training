@@ -55,23 +55,23 @@ def print_help(message: str):
 
 def display_help(session_id: str):
     """Displays a short help message."""
-    print_info(f"Aktualna sesja (ID): {session_id}")
-    print_info(f"Pliki sesji są zapisywane na bieżąco w: {LOG_DIR}")
-    print_help("Dostępne komendy (slash commands):")
-    print_help("  /switch <ID>      - Przełącza na istniejącą sesję.")
-    print_help("  /help             - Wyświetla tę pomoc.")
-    print_help("  /exit, /quit      - Zakończenie czatu.")
-    print_help("\n  /session list     - Wyświetla listę dostępnych sesji.")
-    print_help("  /session display  - Wyświetla całą historię sesji.")
-    print_help("  /session pop      - Usuwa ostatnią parę wpisów (TY i asystent).")
-    print_help("  /session clear    - Czyści historię bieżącej sesji.")
-    print_help("  /session new      - Rozpoczyna nową sesję.")
+    print_info(f"Current session (ID): {session_id}")
+    print_info(f"Session files are saved continuously in: {LOG_DIR}")
+    print_help("Available commands (slash commands):")
+    print_help("  /switch <ID>      - Switch to an existing session.")
+    print_help("  /help             - Show this help.")
+    print_help("  /exit, /quit      - End the chat.")
+    print_help("\n  /session list     - List saved sessions.")
+    print_help("  /session display  - Show full session history.")
+    print_help("  /session pop      - Remove the last user/assistant message pair.")
+    print_help("  /session clear    - Clear the current session history.")
+    print_help("  /session new      - Start a new session.")
 
 
 def display_final_instructions(session_id: str):
     """Displays instructions for continuing the session."""
-    print_info("\n--- Instrukcja Kontynuacji Sesji ---")
-    print_info(f"Aby kontynuować tę sesję (ID: {session_id}) później, użyj komendy:")
+    print_info("\n--- Resuming a session ---")
+    print_info(f"To continue this session (ID: {session_id}) later, run:")
     print(Fore.WHITE + Style.BRIGHT + f"\n    python {sys.argv[0]} --session-id={session_id}\n" + Style.RESET_ALL)
     print("--------------------------------------\n")
 

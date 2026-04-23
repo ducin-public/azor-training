@@ -24,7 +24,7 @@ def generate_pdf_from_markdown(markdown_content, output_filename):
     md = Markdown()
     html_content = md.convert(markdown_content)
     
-    # Użycie tagu <font> jest konieczne dla poprawnego ustawienia czcionki po Parsowaniu.
+    # A <font> tag is required for correct font application after parsing to HTML.
     html_template = f"""
     <font face="Lato">
     {html_content}

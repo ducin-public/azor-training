@@ -3,24 +3,24 @@ from cli import console
 
 def display_history_summary(history: List[Dict], assistant_name: str):
     """
-    Wyświetla podsumowanie historii: liczbę pominiętych i ostatnie 2 wiadomości.
+    Shows a short history summary: omitted count and the last 2 messages.
     
     Args:
-        history: Lista słowników w formacie {"role": "user|model", "parts": [{"text": "..."}]}
-        assistant_name: Nazwa asystenta do wyświetlenia
+        history: List of dicts: {"role": "user|model", "parts": [{"text": "..."}]}
+        assistant_name: Assistant name to display
     """
     total_count = len(history)
     
     if total_count == 0:
         return
 
-    # Wyświetlenie podsumowania
+    # Summary header
     if total_count > 2:
-        console.print_info(f"\n--- Wątek sesji wznowiony ---")
+        console.print_info(f"\n--- Session resumed ---")
         omitted_count = total_count - 2
-        console.print_info(f"(Pominięto {omitted_count} wcześniejszych wiadomości)")
+        console.print_info(f"({omitted_count} earlier message(s) omitted)")
     else:
-        console.print_info(f"\n--- Wątek sesji ---")
+        console.print_info(f"\n--- Session ---")
 
     # Display last 2 messages
     last_two = history[-2:]
@@ -28,7 +28,7 @@ def display_history_summary(history: List[Dict], assistant_name: str):
     for content in last_two:
         # Handle universal dictionary format
         role = content.get('role', '')
-        display_role = "TY" if role == "user" else assistant_name
+        display_role = "YOU" if role == "user" else assistant_name
         
         # Extract text from parts
         text = ""

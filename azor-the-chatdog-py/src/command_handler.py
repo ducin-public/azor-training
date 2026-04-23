@@ -18,7 +18,7 @@ def handle_command(user_input: str) -> bool:
 
     # Check if the main command is valid
     if command not in VALID_SLASH_COMMANDS:
-        console.print_error(f"Błąd: Nieznana komenda: {command}. Użyj /help.")
+        console.print_error(f"Error: Unknown command: {command}. Type /help.")
         current = manager.get_current_session()
         console.display_help(current.session_id)
         return False
@@ -30,7 +30,7 @@ def handle_command(user_input: str) -> bool:
     
     # Exit commands
     if command in ['/exit', '/quit']:
-        console.print_info("\nZakończenie czatu. Uruchamianie procedury finalnego zapisu...")
+        console.print_info("\nExiting chat. Running final save...")
         return True
     
     # Switch command
@@ -39,20 +39,20 @@ def handle_command(user_input: str) -> bool:
             new_id = parts[1]
             current = manager.get_current_session()
             if new_id == current.session_id:
-                console.print_info("Jesteś już w tej sesji.")
+                console.print_info("You are already in this session.")
             else:
                 new_session, save_attempted, previous_session_id, load_successful, load_error, has_history = manager.switch_to_session(new_id)
 
                 # Handle console output for save attempt
                 if save_attempted:
-                    console.print_info(f"\nZapisuję bieżącą sesję: {previous_session_id}...")
+                    console.print_info(f"\nSaving current session: {previous_session_id}...")
 
                 # Handle load result
                 if not load_successful:
-                    console.print_error(f"Nie można wczytać sesji o ID: {new_id}. {load_error}")
+                    console.print_error(f"Cannot load session with ID: {new_id}. {load_error}")
                 else:
                     # Successfully switched
-                    console.print_info(f"\n--- Przełączono na sesję: {new_session.session_id} ---")
+                    console.print_info(f"\n--- Switched to session: {new_session.session_id} ---")
                     console.display_help(new_session.session_id)
                     
                     # Display history summary if session has content
@@ -60,12 +60,12 @@ def handle_command(user_input: str) -> bool:
                         from commands.session_summary import display_history_summary
                         display_history_summary(new_session.get_history(), new_session.assistant_name)
         else:
-            console.print_error("Błąd: Użycie: /switch <SESSION-ID>")
+            console.print_error("Error: Usage: /switch <SESSION-ID>")
             
     # Session subcommands
     elif command == '/session':
         if len(parts) < 2:
-            console.print_error("Błąd: Komenda /session wymaga podkomendy (list, display, pop, clear, new).")
+            console.print_error("Error: /session requires a subcommand (list, display, pop, clear, new).")
         else:
             handle_session_subcommand(parts[1].lower(), manager)
 
@@ -90,30 +90,30 @@ def handle_session_subcommand(subcommand: str, manager):
         success = current.pop_last_exchange()
         if success:
             from commands.session_summary import display_history_summary
-            console.print_info(f"Usunięto ostatnią parę wpisów (TY i {current.assistant_name}).")
+            console.print_info(f"Removed the last message pair (YOU and {current.assistant_name}).")
             display_history_summary(current.get_history(), current.assistant_name)
         else:
-            console.print_error("Błąd: Historia jest pusta lub niekompletna (wymaga co najmniej jednej pary).")
+            console.print_error("Error: History is empty or incomplete (at least one user/assistant pair required).")
             
     elif subcommand == 'clear':
         current.clear_history()
-        console.print_info("Historia bieżącej sesji została wyczyszczona.")
+        console.print_info("Current session history has been cleared.")
         
     elif subcommand == 'new':
         new_session, save_attempted, previous_session_id, save_error = manager.create_new_session(save_current=True)
 
         # Handle console output for save attempt
         if save_attempted:
-            console.print_info(f"\nZapisuję bieżącą sesję: {previous_session_id} przed rozpoczęciem nowej...")
+            console.print_info(f"\nSaving current session: {previous_session_id} before starting a new one...")
             if save_error:
-                console.print_error(f"Błąd podczas zapisu: {save_error}")
+                console.print_error(f"Error while saving: {save_error}")
 
         # Display new session info
-        console.print_info(f"\n--- Rozpoczęto nową sesję: {new_session.session_id} ---")
+        console.print_info(f"\n--- Started new session: {new_session.session_id} ---")
         console.display_help(new_session.session_id)
 
     elif subcommand == 'remove':
         remove_session_command(manager)
         
     else:
-        console.print_error(f"Błąd: Nieznana podkomenda dla /session: {subcommand}. Użyj /help.")
+        console.print_error(f"Error: Unknown /session subcommand: {subcommand}. Type /help.")

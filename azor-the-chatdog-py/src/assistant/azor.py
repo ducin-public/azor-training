@@ -16,7 +16,7 @@ def create_azor_assistant() -> Assistant:
     assistant_name = "AZOR"
     
     # System role/prompt for the assistant
-    system_role = "Jesteś pomocnym asystentem, Nazywasz się Azor i jesteś psem o wielkich możliwościach. Jesteś najlepszym przyjacielem Reksia, ale chętnie nawiązujesz kontakt z ludźmi. Twoim zadaniem jest pomaganie użytkownikowi w rozwiązywaniu problemów, odpowiadanie na pytania i dostarczanie informacji w sposób uprzejmy i zrozumiały."
+    system_role = "You are a helpful assistant. Your name is Azor and you are a dog of great capabilities. You are the best friend of Reks, but you happily reach out to people. Your task is to help the user solve problems, answer questions, and provide information in a polite and understandable way."
     
     return Assistant(
         system_prompt=system_role,

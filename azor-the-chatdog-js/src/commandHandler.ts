@@ -24,10 +24,10 @@ const VALID_SLASH_COMMANDS = [
  * Handle a slash command
  * @returns true if should exit, false otherwise
  */
-export function handleCommand(
+export async function handleCommand(
   userInput: string,
   manager: SessionManager
-): boolean {
+): Promise<boolean> {
   const parts = userInput.trim().split(/\s+/);
   const command = parts[0].toLowerCase();
   const args = parts.slice(1);
@@ -43,7 +43,7 @@ export function handleCommand(
   switch (command) {
     case '/exit':
     case '/quit':
-      printInfo('Do widzenia!');
+      printInfo('Goodbye!');
       return true;
 
     case '/help':
@@ -51,7 +51,7 @@ export function handleCommand(
       return false;
 
     case '/session':
-      handleSessionSubcommand(args, manager);
+      await handleSessionSubcommand(args, manager);
       return false;
 
     case '/switch':
@@ -59,7 +59,7 @@ export function handleCommand(
         printError('Usage: /switch <SESSION_ID>');
       } else {
         const sessionId = args[0];
-        const result = manager.switchToSession(sessionId);
+        const result = await manager.switchToSession(sessionId);
 
         if (result.loadSuccessful) {
           printSuccess(`Switched to session ${sessionId}`);
@@ -89,7 +89,7 @@ export function handleCommand(
 /**
  * Handle /session subcommands
  */
-function handleSessionSubcommand(args: string[], manager: SessionManager): void {
+async function handleSessionSubcommand(args: string[], manager: SessionManager): Promise<void> {
   if (args.length === 0) {
     printError('Usage: /session <list|display|new|clear|pop|remove>');
     return;
@@ -107,7 +107,7 @@ function handleSessionSubcommand(args: string[], manager: SessionManager): void 
       break;
 
     case 'new':
-      const createResult = manager.createNewSession(true);
+      const createResult = await manager.createNewSession(true);
       printSuccess(`Created new session: ${createResult.session.id}`);
       break;
 
@@ -125,7 +125,7 @@ function handleSessionSubcommand(args: string[], manager: SessionManager): void 
       break;
 
     case 'remove':
-      removeCurrentSession(manager);
+      await removeCurrentSession(manager);
       break;
 
     default:

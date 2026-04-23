@@ -42,12 +42,11 @@ export class SessionManager {
   /**
    * Create a new session
    */
-  createNewSession(saveCurrent: boolean = true): SessionCreateResult {
+  async createNewSession(saveCurrent: boolean = true): Promise<SessionCreateResult> {
     let saveAttempted = false;
     let previousId: string | undefined;
     let saveError: string | undefined;
 
-    // Save current session if requested
     if (saveCurrent && this.currentSession) {
       saveAttempted = true;
       previousId = this.currentSession.id;
@@ -58,8 +57,7 @@ export class SessionManager {
       }
     }
 
-    // Create new session
-    const newSession = new ChatSession(this.assistant);
+    const newSession = await ChatSession.create(this.assistant);
     this.currentSession = newSession;
 
     return {
@@ -73,11 +71,10 @@ export class SessionManager {
   /**
    * Switch to an existing session
    */
-  switchToSession(sessionId: string): SessionSwitchResult {
+  async switchToSession(sessionId: string): Promise<SessionSwitchResult> {
     let saveAttempted = false;
     let previousId: string | undefined;
 
-    // Save current session first
     if (this.currentSession) {
       saveAttempted = true;
       previousId = this.currentSession.id;
@@ -88,8 +85,7 @@ export class SessionManager {
       }
     }
 
-    // Load new session
-    const loadResult = ChatSession.loadFromFile(this.assistant, sessionId);
+    const loadResult = await ChatSession.loadFromFile(this.assistant, sessionId);
 
     if (!loadResult.success) {
       return {
@@ -117,7 +113,7 @@ export class SessionManager {
   /**
    * Remove current session and create new one
    */
-  removeCurrentSessionAndCreateNew(): SessionRemoveResult {
+  async removeCurrentSessionAndCreateNew(): Promise<SessionRemoveResult> {
     if (!this.currentSession) {
       throw new Error('No active session to remove');
     }
@@ -125,8 +121,7 @@ export class SessionManager {
     const removedId = this.currentSession.id;
     const removeResult = removeSessionFile(removedId);
 
-    // Create new session
-    const newSession = new ChatSession(this.assistant);
+    const newSession = await ChatSession.create(this.assistant);
     this.currentSession = newSession;
 
     return {
@@ -140,10 +135,9 @@ export class SessionManager {
   /**
    * Initialize from CLI arguments
    */
-  initializeFromCLI(cliSessionId?: string): ChatSession {
+  async initializeFromCLI(cliSessionId?: string): Promise<ChatSession> {
     if (cliSessionId) {
-      // Try to load specified session
-      const result = ChatSession.loadFromFile(this.assistant, cliSessionId);
+      const result = await ChatSession.loadFromFile(this.assistant, cliSessionId);
 
       if (result.success) {
         this.currentSession = result.value;
@@ -154,8 +148,7 @@ export class SessionManager {
       }
     }
 
-    // Create new session
-    const session = new ChatSession(this.assistant);
+    const session = await ChatSession.create(this.assistant);
     this.currentSession = session;
     return session;
   }

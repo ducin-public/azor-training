@@ -6,20 +6,20 @@ def display_full_session(history: List[Dict], session_id: str, assistant_name: s
     Displays the full session history.
     
     Args:
-        history: Lista słowników w formacie {"role": "user|model", "parts": [{"text": "..."}]}
-        session_id: ID sesji
-        assistant_name: Nazwa asystenta do wyświetlenia
+        history: List of dicts: {"role": "user|model", "parts": [{"text": "..."}]}
+        session_id: Session ID
+        assistant_name: Assistant name to display
     """
     if not history:
-        console.print_info("Historia sesji jest pusta.")
+        console.print_info("Session history is empty.")
         return
 
-    console.print_info(f"\n--- PEŁNA HISTORIA SESJI ({session_id}, {len(history)} wpisów) ---")
+    console.print_info(f"\n--- FULL SESSION HISTORY ({session_id}, {len(history)} message(s)) ---")
     
     for i, content in enumerate(history):
         # Handle universal dictionary format
         role = content.get('role', '')
-        display_role = "TY" if role == "user" else assistant_name
+        display_role = "YOU" if role == "user" else assistant_name
         
         # Extract text from parts
         text = ""

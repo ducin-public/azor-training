@@ -1,25 +1,11 @@
 import uuid
-from typing import List, Any, Union
-import os
+from typing import List, Any, Optional
 from files import session_files
 from files.wal import append_to_wal
-from llm.gemini_client import GeminiLLMClient
-from llm.llama_client import LlamaClient
-from llm.openai_client import OpenAIClient
-from llm.anthropic_client import AnthropicClient
+from llm import LLMClientProtocol, create_llm_client_from_environment
+from llm.protocol import ChatSessionProtocol
 from assistant import Assistant
 from cli import console
-
-# Context token limit
-
-# Engine to Client Class mapping
-ENGINE_MAPPING = {
-    'LLAMA_CPP': LlamaClient,
-    'GEMINI': GeminiLLMClient,
-    'OPENAI': OpenAIClient,
-    'ANTHROPIC': AnthropicClient,
-}
-
 
 class ChatSession:
     """
@@ -39,29 +25,22 @@ class ChatSession:
         self.assistant = assistant
         self.session_id = session_id or str(uuid.uuid4())
         self._history = history or []
-        self._llm_client: Union[GeminiLLMClient, LlamaClient, OpenAIClient, AnthropicClient, None] = None
-        self._llm_chat_session = None
+        self._llm_client: Optional[LLMClientProtocol] = None
+        self._llm_chat_session: Optional[ChatSessionProtocol] = None
         self._max_context_tokens = 32768
         self._initialize_llm_session()
     
-    def _initialize_llm_session(self):
+    def _initialize_llm_session(self) -> None:
         """
         Creates or recreates the LLM chat session with current history.
         This should be called after any history modification.
         """
-        # Walidacja zmiennej ENGINE
-        engine = os.getenv('ENGINE', 'GEMINI').upper()
-        if engine not in ENGINE_MAPPING:
-            valid_engines = ', '.join(ENGINE_MAPPING.keys())
-            raise ValueError(f"ENGINE musi być jedną z wartości: {valid_engines}, otrzymano: {engine}")
-        
         # Initialize LLM client if not already created
         if self._llm_client is None:
-            SelectedClientClass = ENGINE_MAPPING.get(engine, GeminiLLMClient)
-            console.print_info(SelectedClientClass.preparing_for_use_message())
-            self._llm_client = SelectedClientClass.from_environment()
+            # Use factory function to create the appropriate client
+            self._llm_client = create_llm_client_from_environment()
             console.print_info(self._llm_client.ready_for_use_message())
-        
+
         self._llm_chat_session = self._llm_client.create_chat_session(
             system_instruction=self.assistant.system_prompt,
             history=self._history,
@@ -93,31 +72,34 @@ class ChatSession:
         """
         Saves this session to disk.
         Only saves if history has at least one complete exchange.
-        
+
         Returns:
             tuple: (success: bool, error_message: str | None)
         """
         # Sync history from LLM session before saving
         if self._llm_chat_session:
             self._history = self._llm_chat_session.get_history()
-        
+
+        if not self._llm_client:
+            return False, "LLM client not initialized"
+
         return session_files.save_session_history(
-            self.session_id, 
-            self._history, 
-            self.assistant.system_prompt, 
+            self.session_id,
+            self._history,
+            self.assistant.system_prompt,
             self._llm_client.get_model_name()
         )
     
-    def send_message(self, text: str):
+    def send_message(self, text: str) -> Any:
         """
         Sends a message to the LLM and returns the response.
         Updates internal history automatically and logs to WAL.
-        
+
         Args:
             text: User's message
-            
+
         Returns:
-            Response object from Google GenAI
+            Response object with .text attribute
         """
         if not self._llm_chat_session:
             raise RuntimeError("LLM session not initialized")
@@ -129,12 +111,13 @@ class ChatSession:
         
         # Log to WAL
         total_tokens = self.count_tokens()
+        model_name = self._llm_client.get_model_name() if self._llm_client else "unknown"
         success, error = append_to_wal(
             session_id=self.session_id,
             prompt=text,
             response_text=response.text,
             total_tokens=total_tokens,
-            model_name=self._llm_client.get_model_name()
+            model_name=model_name
         )
         
         if not success and error:
@@ -151,7 +134,7 @@ class ChatSession:
             self._history = self._llm_chat_session.get_history()
         return self._history
     
-    def clear_history(self):
+    def clear_history(self) -> None:
         """Clears all conversation history and reinitializes the LLM session."""
         self._history = []
         self._initialize_llm_session()

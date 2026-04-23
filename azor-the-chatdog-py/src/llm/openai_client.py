@@ -77,9 +77,9 @@ class OpenAIChatSession:
             return OpenAIResponse(response_text)
 
         except Exception as e:
-            console.print_error(f"Błąd podczas generowania odpowiedzi OpenAI: {e}")
+            console.print_error(f"Error while generating OpenAI response: {e}")
             # Return error response
-            error_text = "Przepraszam, wystąpił błąd podczas generowania odpowiedzi."
+            error_text = "Sorry, an error occurred while generating a response."
             assistant_message = {"role": "model", "parts": [{"text": error_text}]}
             self._history.append(assistant_message)
             return OpenAIResponse(error_text)
@@ -159,7 +159,7 @@ class OpenAIClient:
         Returns:
             Formatted preparation message string
         """
-        return "🤖 Przygotowywanie klienta OpenAI..."
+        return "🤖 Preparing OpenAI client..."
 
     @classmethod
     def from_environment(cls) -> 'OpenAIClient':
@@ -195,7 +195,7 @@ class OpenAIClient:
         try:
             return OpenAI(api_key=self.api_key)
         except Exception as e:
-            console.print_error(f"Błąd inicjalizacji klienta OpenAI: {e}")
+            console.print_error(f"Error initializing OpenAI client: {e}")
             sys.exit(1)
 
     def create_chat_session(self,
@@ -252,7 +252,7 @@ class OpenAIClient:
             return len(full_text) // 4
 
         except Exception as e:
-            console.print_error(f"Błąd podczas liczenia tokenów: {e}")
+            console.print_error(f"Error while counting tokens: {e}")
             return 0
 
     def get_model_name(self) -> str:
@@ -281,7 +281,7 @@ class OpenAIClient:
         else:
             masked_key = f"{self.api_key[:4]}...{self.api_key[-4:]}"
 
-        return f"✅ Klient OpenAI gotowy do użycia (Model: {self.model_name}, Key: {masked_key})"
+        return f"✅ OpenAI client ready (Model: {self.model_name}, Key: {masked_key})"
 
     @property
     def client(self):

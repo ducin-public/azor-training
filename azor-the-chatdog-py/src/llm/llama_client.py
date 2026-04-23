@@ -65,9 +65,9 @@ class LlamaChatSession:
             return LlamaResponse(response_text)
             
         except Exception as e:
-            console.print_error(f"Błąd podczas generowania odpowiedzi LLaMA: {e}")
+            console.print_error(f"Error while generating LLaMA response: {e}")
             # Return error response
-            error_text = "Przepraszam, wystąpił błąd podczas generowania odpowiedzi."
+            error_text = "Sorry, an error occurred while generating a response."
             assistant_message = {"role": "model", "parts": [{"text": error_text}]}
             self._history.append(assistant_message)
             return LlamaResponse(error_text)
@@ -162,7 +162,7 @@ class LlamaClient:
         Returns:
             Formatted preparation message string
         """
-        return "🦙 Przygotowywanie klienta llama.cpp..."
+        return "🦙 Preparing llama.cpp client..."
     
     @classmethod
     def from_environment(cls) -> 'LlamaClient':
@@ -185,7 +185,7 @@ class LlamaClient:
             llama_context_size=int(os.getenv('LLAMA_CONTEXT_SIZE', '2048'))
         )
         
-        console.print_info(f"Ładowanie modelu LLaMA z: {config.llama_model_path}")
+        console.print_info(f"Loading LLaMA model from: {config.llama_model_path}")
         
         return cls(
             model_name=config.model_name,
@@ -205,9 +205,9 @@ class LlamaClient:
             RuntimeError: If model initialization fails
         """
         try:
-            console.print_info(f"Inicjalizacja modelu LLaMA: {self.model_name}")
-            console.print_info(f"Ścieżka: {self.model_path}")
-            console.print_info(f"Warstwy GPU: {self.n_gpu_layers}, Kontekst: {self.n_ctx}")
+            console.print_info(f"Initializing LLaMA model: {self.model_name}")
+            console.print_info(f"Path: {self.model_path}")
+            console.print_info(f"GPU layers: {self.n_gpu_layers}, context: {self.n_ctx}")
             
             return Llama(
                 model_path=self.model_path,
@@ -216,7 +216,7 @@ class LlamaClient:
                 verbose=False  # Reduce verbose output
             )
         except Exception as e:
-            console.print_error(f"Błąd inicjalizacji modelu LLaMA: {e}")
+            console.print_error(f"Error initializing LLaMA model: {e}")
             raise RuntimeError(f"Failed to initialize LLaMA model: {e}")
     
     def create_chat_session(self, 
@@ -272,7 +272,7 @@ class LlamaClient:
             return len(tokens)
             
         except Exception as e:
-            console.print_error(f"Błąd podczas liczenia tokenów: {e}")
+            console.print_error(f"Error while counting tokens: {e}")
             # Fallback: rough estimation (4 chars per token average)
             total_chars = sum(len(msg["parts"][0]["text"]) for msg in history if "parts" in msg and msg["parts"])
             return total_chars // 4
@@ -297,7 +297,7 @@ class LlamaClient:
         Returns:
             Formatted message string for display
         """
-        return f"✅ Klient llama.cpp gotowy do użycia (model lokalny: {self.model_name}, Warstwy GPU: {self.n_gpu_layers}, Kontekst: {self.n_ctx}"
+        return f"✅ llama.cpp client ready (local model: {self.model_name}, GPU layers: {self.n_gpu_layers}, context: {self.n_ctx}"
     
     @property
     def client(self):

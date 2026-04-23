@@ -59,17 +59,17 @@ export function printUser(message: string): void {
  */
 export function displayHelp(sessionId?: string): void {
   if (sessionId) {
-    printInfo(`Aktualna sesja (ID): ${sessionId}`);
+    printInfo(`Current session (ID): ${sessionId}`);
   }
-  printHelp('Dostępne komendy (slash commands):');
-  printHelp('  /switch <ID>      - Przełącza na istniejącą sesję.');
-  printHelp('  /help             - Wyświetla tę pomoc.');
-  printHelp('  /exit, /quit      - Zakończenie czatu.');
-  printHelp('\n  /session list     - Wyświetla listę dostępnych sesji.');
-  printHelp('  /session display  - Wyświetla całą historię sesji.');
-  printHelp('  /session pop      - Usuwa ostatnią parę wpisów (TY i asystent).');
-  printHelp('  /session clear    - Czyści historię bieżącej sesji.');
-  printHelp('  /session new      - Rozpoczyna nową sesję.');
+  printHelp('Available commands (slash commands):');
+  printHelp('  /switch <ID>      - Switch to an existing session.');
+  printHelp('  /help             - Show this help.');
+  printHelp('  /exit, /quit      - End the chat.');
+  printHelp('\n  /session list     - List saved sessions.');
+  printHelp('  /session display  - Show full session history.');
+  printHelp('  /session pop      - Remove the last user/assistant message pair.');
+  printHelp('  /session clear    - Clear the current session history.');
+  printHelp('  /session new      - Start a new session.');
 }
 
 /**

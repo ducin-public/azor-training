@@ -1,5 +1,8 @@
 /**
- * OpenAI API LLM Client
+ * OpenRouter LLM Client
+ *
+ * OpenRouter exposes an OpenAI-compatible API, so we reuse the OpenAI SDK
+ * and point it at https://openrouter.ai/api/v1.
  */
 
 import OpenAI from 'openai';
@@ -9,12 +12,14 @@ import type {
   Message,
   LLMResponse,
 } from '../types/index.js';
-import { validateOpenAIConfig } from './openaiValidation.js';
+import { validateOpenRouterConfig } from './openrouterValidation.js';
+
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 /**
- * Wrapper for OpenAI chat session to provide universal interface
+ * Wrapper for an OpenRouter chat session
  */
-class OpenAIChatSessionWrapper implements ILLMChatSession {
+class OpenRouterChatSessionWrapper implements ILLMChatSession {
   private client: OpenAI;
   private modelName: string;
   private systemInstruction: string;
@@ -33,34 +38,27 @@ class OpenAIChatSessionWrapper implements ILLMChatSession {
   }
 
   async sendMessage(text: string): Promise<LLMResponse> {
-    // Add user message to history
     this.history.push({
       role: 'user',
       parts: [{ text }],
     });
 
-    // Convert history to OpenAI format
-    const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      {
-        role: 'system',
-        content: this.systemInstruction,
-      },
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      { role: 'system', content: this.systemInstruction },
       ...this.history.map((msg) => ({
         role: msg.role === 'model' ? ('assistant' as const) : ('user' as const),
         content: msg.parts.map((part) => part.text).join(''),
       })),
     ];
 
-    // Send message to OpenAI API
     const completion = await this.client.chat.completions.create({
       model: this.modelName,
-      messages: openaiMessages,
-      max_completion_tokens: 4096,
+      messages,
+      max_tokens: 4096,
     });
 
     const responseText = completion.choices[0].message.content?.trim() || '';
 
-    // Add assistant response to history
     this.history.push({
       role: 'model',
       parts: [{ text: responseText }],
@@ -75,9 +73,9 @@ class OpenAIChatSessionWrapper implements ILLMChatSession {
 }
 
 /**
- * OpenAI LLM Client implementation
+ * OpenRouter LLM Client implementation
  */
-export class OpenAILLMClient implements ILLMClient {
+export class OpenRouterLLMClient implements ILLMClient {
   private client: OpenAI;
   private modelName: string;
   private apiKey: string;
@@ -85,28 +83,23 @@ export class OpenAILLMClient implements ILLMClient {
   constructor(modelName: string, apiKey: string) {
     this.modelName = modelName;
     this.apiKey = apiKey;
-    this.client = new OpenAI({ apiKey });
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: OPENROUTER_BASE_URL,
+    });
   }
 
-  /**
-   * Create client from environment variables
-   */
-  static fromEnvironment(): OpenAILLMClient {
-    const config = validateOpenAIConfig();
-    return new OpenAILLMClient(config.modelName, config.openaiApiKey);
+  static fromEnvironment(): OpenRouterLLMClient {
+    const config = validateOpenRouterConfig();
+    return new OpenRouterLLMClient(config.modelName, config.openrouterApiKey);
   }
 
-  /**
-   * Create a chat session
-   */
   createChatSession(
     systemInstruction: string,
     history?: Message[],
     _thinkingBudget?: number
   ): ILLMChatSession {
-    // Note: OpenAI doesn't support thinking budget like some other models
-    // The parameter is ignored for compatibility with the interface
-    return new OpenAIChatSessionWrapper(
+    return new OpenRouterChatSessionWrapper(
       this.client,
       this.modelName,
       systemInstruction,
@@ -114,12 +107,7 @@ export class OpenAILLMClient implements ILLMClient {
     );
   }
 
-  /**
-   * Count tokens in history
-   */
   countHistoryTokens(history: Message[]): number {
-    // Rough estimation: 1 token ≈ 4 characters
-    // For production, you could use tiktoken library
     let totalTokens = 0;
     for (const msg of history) {
       for (const part of msg.parts) {
@@ -138,13 +126,13 @@ export class OpenAILLMClient implements ILLMClient {
   }
 
   preparingForUseMessage(): string {
-    return `Preparing OpenAI model ${this.modelName}...`;
+    return `Preparing OpenRouter model ${this.modelName}...`;
   }
 
   readyForUseMessage(): string {
     const maskedKey = this.apiKey
       ? `${this.apiKey.substring(0, 8)}...${this.apiKey.substring(this.apiKey.length - 4)}`
       : 'NOT SET';
-    return `OpenAI ${this.modelName} ready (API Key: ${maskedKey})`;
+    return `OpenRouter ${this.modelName} ready (API Key: ${maskedKey})`;
   }
 }

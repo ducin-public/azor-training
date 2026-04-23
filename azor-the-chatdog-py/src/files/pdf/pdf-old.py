@@ -53,7 +53,7 @@ def generate_pdf_from_markdown(markdown_content, output_filename):
             pdf.ln(LINE_HEIGHT / 4)
 
         elif line.startswith('* '):
-            pdf.set_font('Lato', '', 12) # Powrót do normalnego stylu
+            pdf.set_font('Lato', '', 12)  # Back to normal style
             list_item = line[2:].strip()
             wrapped_text = textwrap.wrap(list_item, width=int(TEXT_WIDTH / 7)) 
             

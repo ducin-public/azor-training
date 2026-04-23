@@ -47,7 +47,7 @@ def main_loop():
 
             # Display response
             console.print_assistant(f"\n{session.assistant_name}: {response.text}")
-            console.print_info(f"Tokens: {total_tokens} (Pozostało: {remaining_tokens} / {max_tokens})")
+            console.print_info(f"Tokens: {total_tokens} (Remaining: {remaining_tokens} / {max_tokens})")
 
             # Save session
             success, error = session.save_to_file()
@@ -55,13 +55,13 @@ def main_loop():
                 console.print_error(f"Error saving session: {error}")
 
         except KeyboardInterrupt:
-            console.print_info("\nPrzerwano przez użytkownika (Ctrl+C). Uruchamianie procedury finalnego zapisu...")
+            console.print_info("\nInterrupted by user (Ctrl+C). Running final save...")
             break
         except EOFError:
-            console.print_info("\nWyjście (Ctrl+D).")
+            console.print_info("\nEnd of input (Ctrl+D).")
             break
         except Exception as e:
-            console.print_error(f"\nWystąpił nieoczekiwany błąd: {e}")
+            console.print_error(f"\nUnexpected error: {e}")
             import traceback
             traceback.print_exc()
             break

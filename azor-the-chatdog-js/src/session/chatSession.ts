@@ -16,26 +16,38 @@ import { loadSessionHistory, saveSessionHistory } from '../files/sessionFiles.js
 import { appendToWAL } from '../files/wal.js';
 import { MAX_CONTEXT_TOKENS } from '../files/config.js';
 import { GeminiLLMClient } from '../llm/geminiClient.js';
-import { LlamaClient } from '../llm/llamaClient.js';
 import { AnthropicLLMClient } from '../llm/anthropicClient.js';
 import { OpenAILLMClient } from '../llm/openaiClient.js';
+import { OpenRouterLLMClient } from '../llm/openrouterClient.js';
 
-/**
- * Engine mapping for LLM client selection
- */
-const ENGINE_MAPPING: Record<string, typeof GeminiLLMClient | typeof LlamaClient | typeof AnthropicLLMClient | typeof OpenAILLMClient> = {
-  LLAMA_CPP: LlamaClient,
+const SYNC_ENGINE_MAPPING: Record<string, { fromEnvironment(): ILLMClient }> = {
   GEMINI: GeminiLLMClient,
   ANTHROPIC: AnthropicLLMClient,
   OPENAI: OpenAILLMClient,
+  OPENROUTER: OpenRouterLLMClient,
 };
 
 /**
- * Get the selected LLM client based on ENGINE environment variable
+ * Create the selected LLM client based on ENGINE environment variable.
+ * LlamaClient is loaded dynamically so that node-llama-cpp is never imported
+ * when ENGINE is not LLAMA_CPP.
  */
-function getSelectedLLMClient(): ILLMClient {
+async function createLLMClient(): Promise<ILLMClient> {
   const engine = (process.env.ENGINE || 'GEMINI').toUpperCase();
-  const SelectedClientClass = ENGINE_MAPPING[engine] || GeminiLLMClient;
+
+  if (engine === 'LLAMA_CPP') {
+    try {
+      const { LlamaClient } = await import('../llm/llamaClient.js');
+      return LlamaClient.fromEnvironment();
+    } catch {
+      throw new Error(
+        'ENGINE is set to LLAMA_CPP but the llama module could not be loaded. ' +
+          'Make sure node-llama-cpp is installed: npm install node-llama-cpp'
+      );
+    }
+  }
+
+  const SelectedClientClass = SYNC_ENGINE_MAPPING[engine] ?? GeminiLLMClient;
   return SelectedClientClass.fromEnvironment();
 }
 
@@ -48,16 +60,16 @@ export class ChatSession {
   private llmClient: ILLMClient;
   private llmChatSession: ILLMChatSession;
   private assistant: Assistant;
-
-  constructor(assistant: Assistant, sessionId?: string, history?: Message[]) {
+  constructor(
+    assistant: Assistant,
+    llmClient: ILLMClient,
+    sessionId?: string,
+    history?: Message[]
+  ) {
     this.sessionId = sessionId || uuidv4();
     this.assistant = assistant;
     this.history = history || [];
-
-    // Initialize LLM client
-    this.llmClient = getSelectedLLMClient();
-
-    // Create chat session
+    this.llmClient = llmClient;
     this.llmChatSession = this.llmClient.createChatSession(
       assistant.systemPrompt,
       this.history
@@ -65,20 +77,33 @@ export class ChatSession {
   }
 
   /**
+   * Async factory — use this instead of `new ChatSession()` so that
+   * the LLM client (including optional LlamaCpp) is loaded on demand.
+   */
+  static async create(
+    assistant: Assistant,
+    sessionId?: string,
+    history?: Message[]
+  ): Promise<ChatSession> {
+    const llmClient = await createLLMClient();
+    return new ChatSession(assistant, llmClient, sessionId, history);
+  }
+
+  /**
    * Load session from file
    */
-  static loadFromFile(
+  static async loadFromFile(
     assistant: Assistant,
     sessionId: string
-  ): Result<ChatSession, string> {
+  ): Promise<Result<ChatSession, string>> {
     const result = loadSessionHistory(sessionId);
 
     if (!result.success) {
       return { success: false, error: result.error };
     }
 
-    const history = result.value;
-    const session = new ChatSession(assistant, sessionId, history);
+    const { history } = result.value;
+    const session = await ChatSession.create(assistant, sessionId, history);
 
     return { success: true, value: session };
   }
@@ -145,10 +170,8 @@ export class ChatSession {
       return false;
     }
 
-    // Remove last two messages (user + assistant)
     this.history.splice(this.history.length - 2, 2);
 
-    // Recreate chat session with updated history
     this.llmChatSession = this.llmClient.createChatSession(
       this.assistant.systemPrompt,
       this.history
@@ -212,4 +235,5 @@ export class ChatSession {
   get modelName(): string {
     return this.llmClient.getModelName();
   }
+
 }

@@ -144,7 +144,7 @@ class SessionManager:
                 console.print_error(error)
                 # Fallback to new session
                 session = ChatSession(assistant=assistant)
-                console.print_info(f"Rozpoczęto nową sesję z ID: {session.session_id}")
+                console.print_info(f"Started new session with ID: {session.session_id}")
             
             self._current_session = session
             
@@ -153,7 +153,7 @@ class SessionManager:
                 from commands.session_summary import display_history_summary
                 display_history_summary(session.get_history(), session.assistant_name)
         else:
-            print("Rozpoczynanie nowej sesji.")
+            print("Starting a new session.")
             assistant = create_azor_assistant()
             session = ChatSession(assistant=assistant)
             self._current_session = session
@@ -172,8 +172,8 @@ class SessionManager:
         session = self._current_session
         
         if session.is_empty():
-            console.print_info(f"\nSesja jest pusta/niekompletna. Pominięto finalny zapis.")
+            console.print_info(f"\nSession is empty or incomplete. Skipped final save.")
         else:
-            console.print_info(f"\nFinalny zapis historii sesji: {session.session_id}")
+            console.print_info(f"\nFinal save of session history: {session.session_id}")
             session.save_to_file()
             console.display_final_instructions(session.session_id)

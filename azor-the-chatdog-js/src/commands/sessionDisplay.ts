@@ -12,18 +12,18 @@ export function displaySessionHistory(session: ChatSession): void {
   const history = session.getHistory();
 
   if (history.length === 0) {
-    printInfo('Historia sesji jest pusta.');
+    printInfo('Session history is empty.');
     return;
   }
 
   printInfo(
-    `\n--- PEŁNA HISTORIA SESJI (${session.id}, ${history.length} wpisów) ---`
+    `\n--- FULL SESSION HISTORY (${session.id}, ${history.length} message(s)) ---`
   );
 
   for (let i = 0; i < history.length; i++) {
     const msg = history[i];
     const role = msg.role;
-    const displayRole = role === 'user' ? 'TY' : session.assistantName;
+    const displayRole = role === 'user' ? 'YOU' : session.assistantName;
     const text = msg.parts[0]?.text || '';
 
     // Display with appropriate function based on role

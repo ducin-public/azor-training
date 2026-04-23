@@ -7,15 +7,15 @@ sequenceDiagram
     H ->> A: run application
     A ->> A: provide (available tools)
 
-    rect rgb(191, 223, 255)
-    Note over A, M: No tool use
-    A ->> H: ask for input
-    H -->> A: input(prompt)
-    A ->> M: invoke<br />SYSTEM PROMPT=⚙️ System Prompt<br/>❓ ROLE=User, TEXT=prompt<br/>🛠️ TOOLS=[list_of_tools]
-    M -->> A: FINAL ANSWER
-    end
+    %% %% rect rgb(191, 223, 255)
+    %% Note over A, M: No tool use
+    %% A ->> H: ask for input
+    %% H -->> A: input(prompt)
+    %% A ->> M: invoke<br />SYSTEM PROMPT=⚙️ System Prompt<br/>❓ ROLE=User, TEXT=prompt<br/>🛠️ TOOLS=[list_of_tools]
+    %% M -->> A: FINAL ANSWER
+    %% %% end
     
-    rect rgb(191, 223, 255)
+    %% rect rgb(191, 223, 255)
     Note over A, M: Tool use
     A ->> H: ask for input
     H -->> A: input(prompt)
@@ -28,10 +28,10 @@ sequenceDiagram
     A ->> M: invoke<br />⚙️ SYSTEM PROMPT=System Prompt<br/>❓ ROLE=User, TEXT=prompt<br/>✨ ROLE=Assistant, 🔥TOOL CALL🔥=SomeToolCall{...}<br/>🛠️ ROLE=🔥TOOL🔥, RESULT=SomeResult{...}<br/>🛠️ TOOLS=[list_of_tools]
 
     %% either another TOOL CALL
-    M -->> A: answer/🛠️ TOOL CALL
+    %% M -->> A: answer/🛠️ TOOL CALL
     %% or FINAL ANSWER (text)
     M -->> A: FINAL ANSWER
-    end
+    %% end
 
     A ->> H: ask for input
     H -->> A: `/exit`
